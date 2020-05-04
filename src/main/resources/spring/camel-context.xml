@@ -1,36 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd	http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
     
     <bean class="org.apache.camel.component.properties.PropertiesComponent" id="properties">
 	    <property name="location" value="classpath:application.properties"/>
 	</bean>
     
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
-        <property name="dataSource" ref="dataSource"/>
+<!--     <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"> -->
+<!--         <property name="dataSource" ref="dataSource"/> -->
+<!--         <property name="packagesToScan" value="com.varegos.dto"/> -->
+<!--         <property name="hibernateProperties"> -->
+<!--             <props> -->
+<!--                 <prop key="hibernate.dialect"> -->
+<!--                     org.hibernate.dialect.SQLServerDialect -->
+<!--                 </prop> -->
+<!--             </props> -->
+<!--         </property> -->
+<!--     </bean> -->
+    
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+	    <property name="dataSource" ref="dataSource"/>
         <property name="packagesToScan" value="com.varegos.dto"/>
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">
-                    org.hibernate.dialect.SQLServerDialect
-                </prop>
-            </props>
-        </property>
-    </bean>
+        <property name="persistenceXmlLocation" value="classpath:persistence.xml"/>
+        <property name="persistenceUnitName" value="pUnit"/>
+	</bean>
+    
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
 		<property name="url" value="${datasource.url}" />
 		<property name="username" value="${datasource.username}" />
 		<property name="password" value="${datasource.password}" />
 	</bean>
+	
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="sessionFactory" ref="sessionFactory" />
+<!-- 	    <property name="sessionFactory" ref="sessionFactory"/> -->
+<!--   		<property name="dataSource" ref="dataSource"/> -->
 	</bean>
+<!-- 	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager"> -->
+<!-- 	</bean> -->
 	
 	<bean id="exceptionHandler" class="com.varegos.ExceptionHandler"/>
 	<bean id="petProcessor" class="com.varegos.PetProcessor"/>
 	<bean id="petDao" class="com.varegos.PetDAO"/>
-	<bean id="resultSetRunner" class="com.varegos.ResultSetRunner"/>
+<!-- 	<bean id="resultSetRunner" class="com.varegos.ResultSetRunner"/> -->
+	
+	<jpa:repositories base-package="com.varegos"/>
 	
     <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
         
@@ -100,16 +115,16 @@
             </setBody>
         </route>
         
-        <route id="result-set-run">
-            <from uri="direct:getOrderById"/>
-            <bean ref="resultSetRunner" method="getSeveralResultSets"/>
-            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
-                <constant>200</constant>
-            </setHeader>
-            <setBody>
-                <simple>${body}</simple>
-            </setBody>
-        </route>
+<!--         <route id="result-set-run"> -->
+<!--             <from uri="direct:getOrderById"/> -->
+<!--             <bean ref="resultSetRunner" method="getSeveralResultSets"/> -->
+<!--             <setHeader headerName="Exchange.HTTP_RESPONSE_CODE"> -->
+<!--                 <constant>200</constant> -->
+<!--             </setHeader> -->
+<!--             <setBody> -->
+<!--                 <simple>${body}</simple> -->
+<!--             </setBody> -->
+<!--         </route> -->
         
     </camelContext>
 </beans>
